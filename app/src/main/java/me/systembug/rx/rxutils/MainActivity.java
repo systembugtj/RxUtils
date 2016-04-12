@@ -1,4 +1,4 @@
-package rx.systembug.cn.rxutils;
+package me.systembug.rx.rxutils;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
