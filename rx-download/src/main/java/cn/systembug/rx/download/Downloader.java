@@ -146,11 +146,7 @@ public class Downloader {
                             while (source.read(sink.buffer(), DOWNLOAD_CHUNK_SIZE) != -1) {
                                 bytesRead += DOWNLOAD_CHUNK_SIZE;
                                 int progress = (int) ((bytesRead * 100) / contentLength);
-                                // slow down.
-                                if (progress - previous > 12) {
-                                    getListener().downloadProgress(progress);
-                                    previous = progress;
-                                }
+                                getListener().downloadProgress(progress);
                             }
 
                             sink.writeAll(source);
