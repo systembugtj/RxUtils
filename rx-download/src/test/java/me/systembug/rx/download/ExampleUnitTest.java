@@ -1,4 +1,4 @@
-package cn.systembug.rx.download;
+package me.systembug.rx.download;
 
 import org.junit.Test;
 

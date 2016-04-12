@@ -1,4 +1,4 @@
-package cn.systembug.rx.rxutils;
+package me.systembug.rx.rxutils;
 
 import org.junit.Test;
 
