@@ -1,5 +1,4 @@
-package rx.systembug.cn.rxutils;
-
+package cn.systembug.rx.rxutils;
 import android.app.Application;
 import android.test.ApplicationTestCase;
 

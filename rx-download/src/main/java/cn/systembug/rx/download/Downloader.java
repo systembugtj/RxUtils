@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -16,11 +17,13 @@ import okio.BufferedSource;
 import okio.Okio;
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by systembug on 4/12/16.
  */
-public class Downloader
+public class Downloader {
 
     public interface OnDownloadChangeListener {
         void startDownload(String url);
@@ -29,8 +32,10 @@ public class Downloader
     }
 
     private OnDownloadChangeListener mListener;
+
     private String mUrl = "";
     private OkHttpClient mOkHttpClient;
+    private String mLocal = "";
 
     public Downloader client(OkHttpClient client) {
         mOkHttpClient = client;
@@ -38,15 +43,44 @@ public class Downloader
     }
 
     public Downloader listener (OnDownloadChangeListener listener) {
-        mListener = listener;
+        if (listener != null) {
+            mListener = listener;
+        }
         return this;
     }
+
 
     public Downloader url(String url) {
         mUrl = url;
         return this;
     }
 
+    public Downloader local(String local) {
+        mLocal = local;
+        return this;
+    }
+
+    protected OnDownloadChangeListener getListener() {
+        if (mListener == null) {
+            mListener = new OnDownloadChangeListener() {
+                @Override
+                public void startDownload(String url) {
+
+                }
+
+                @Override
+                public void downloadProgress(int step) {
+
+                }
+
+                @Override
+                public void downloadComplete() {
+
+                }
+            };
+        }
+        return mListener;
+    }
 
     public OkHttpClient getOkHttpClient() {
         if (mOkHttpClient == null) {
@@ -55,38 +89,46 @@ public class Downloader
         return mOkHttpClient;
     }
 
-    public Observable<Response> download() {
-        if ()
+    public Observable<String> download() {
         return Observable.create(new Observable.OnSubscribe<Response>() {
-            @Override
-            public void call(Subscriber<? super Response> subscriber) {
-                    if (mListener != null) {
-                        mListener.startDownload(mUrl);
-                    }
-                    mOkHttpClient.newCall(new Request.Builder().url(mUrl).build()).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            subscriber.onError(e);
+                    @Override
+                    public void call(Subscriber<? super Response> subscriber) {
+
+                        getListener().startDownload(mUrl);
+
+                        if (mUrl == null || mUrl.length() <= 0) {
+                            subscriber.onError(new InvalidParameterException("url should be set."));
+                            return;
+                        }
+                        if (mLocal == null || mLocal.length() <= 0) {
+                            subscriber.onError(new InvalidParameterException("local should be set."));
+                            return;
                         }
 
-                        @Override
-                        public void onResponse(Call call, final Response response) throws IOException {
-                            if (!response.isSuccessful()) {
-                                subscriber.onError(new IOException("Unexpected code " + response));
-                            } else {
-                                subscriber.onNext(response);
-                                subscriber.onCompleted();
-                            }
-                        }
-                    });
+                        mOkHttpClient.newCall(new Request.Builder().url(mUrl).build()).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    subscriber.onError(e);
+                                }
+
+                                @Override
+                                public void onResponse(Call call, final Response response) throws IOException {
+                                    if (!response.isSuccessful()) {
+                                        subscriber.onError(new IOException("Unexpected code " + response));
+                                    } else {
+                                        subscriber.onNext(response);
+                                        subscriber.onCompleted();
+                                    }
+                                }
+                            });
                     }
                 })
                 .map(response -> {
                     if (response.isSuccessful()) {
                         BufferedSink sink = null;
                         try {
-                            String path = Utils.getExternalSavePath(this) + fileName + ".jpg";
-                            File file = new File(path);
+
+                            File file = new File(mLocal);
 
                             sink = Okio.buffer(Okio.sink(file));
 
@@ -96,22 +138,24 @@ public class Downloader
                             long contentLength = body.contentLength();
                             BufferedSource source = body.source();
 
-                            mProgressEvent.send(new AsyncEvent(EventType.SYNC_DOWNLOAD, 2));
+                            if (mListener != null) {
+
+                            }
+                            getListener().downloadProgress(2);
                             int previous = 0;
                             while (source.read(sink.buffer(), DOWNLOAD_CHUNK_SIZE) != -1) {
                                 bytesRead += DOWNLOAD_CHUNK_SIZE;
                                 int progress = (int) ((bytesRead * 100) / contentLength);
                                 // slow down.
                                 if (progress - previous > 12) {
-                                    mProgressEvent.send(new AsyncEvent(EventType.SYNC_DOWNLOAD, progress));
+                                    getListener().downloadProgress(progress);
                                     previous = progress;
                                 }
                             }
 
                             sink.writeAll(source);
                             sink.close();
-                            Log.d(Constant.TAG, "downloaded file: " + path);
-                            return path;
+                            return mLocal;
                         } catch (IOException ex) {
                             try{
                                 if(sink != null) {
@@ -120,13 +164,14 @@ public class Downloader
                             }catch (Exception ignored) {
                                 // ignore exceptions generated by close()
                             }
-                            Log.e(Constant.TAG, "IO error: ", ex);
                         }
-                        mProgressEvent.send(new AsyncEvent(EventType.SYNC_DOWNLOAD, 0));
+                        getListener().downloadComplete();
+                        return mLocal;
                     }
                     return ""; // not downloaded, return empty string to ignore it.
-
-                });
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 }
 
