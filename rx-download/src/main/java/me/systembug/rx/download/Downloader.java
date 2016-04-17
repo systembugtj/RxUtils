@@ -2,6 +2,9 @@ package me.systembug.rx.download;
 
 import android.util.Log;
 
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
@@ -35,12 +38,12 @@ public class Downloader {
     }
 
     public Downloader url(String url) {
-        mUrl = url;
+        mUrl =  Preconditions.checkNotNull(url);
         return this;
     }
 
     public Downloader local(String local) {
-        mLocal = local;
+        mLocal =  Preconditions.checkNotNull(local);
         return this;
     }
 
@@ -56,11 +59,11 @@ public class Downloader {
         return Observable.create(new Observable.OnSubscribe<Response>() {
                     @Override
                     public void call(Subscriber<? super Response> subscriber) {
-                        if (mUrl == null || mUrl.length() <= 0) {
+                        if (Strings.isNullOrEmpty(mUrl)) {
                             subscriber.onError(new InvalidParameterException("url should be set."));
                             return;
                         }
-                        if (mLocal == null || mLocal.length() <= 0) {
+                        if (Strings.isNullOrEmpty(mLocal)) {
                             subscriber.onError(new InvalidParameterException("local should be set."));
                             return;
                         }
