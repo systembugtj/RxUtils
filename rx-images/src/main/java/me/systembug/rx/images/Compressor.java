@@ -1,4 +1,4 @@
-package cn.systembug.rx.images;
+package me.systembug.rx.images;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
-import cn.systembug.rx.images.util.ImageUtil;
+import me.systembug.rx.images.util.ImageUtil;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;

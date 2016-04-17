@@ -1,4 +1,4 @@
-package cn.systembug.rx.images;
+package me.systembug.rx.images;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

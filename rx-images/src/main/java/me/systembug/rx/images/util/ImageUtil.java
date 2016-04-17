@@ -1,4 +1,4 @@
-package cn.systembug.rx.images.util;
+package me.systembug.rx.images.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
