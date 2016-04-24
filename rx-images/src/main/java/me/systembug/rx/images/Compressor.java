@@ -17,12 +17,17 @@ import rx.schedulers.Schedulers;
  * Created by systembug on 4/17/16.
  */
 public class Compressor {
+
+    // if less than this length, will not be converted.
+    public static long DEFAULT_MIN_LENGTH = 2097152;
+
     private boolean mInPlaceConvert = true;
     private String mPath;
     private String mNewPath;
     private int mWidth;
     private int mHeight;
     private int mQuality = 1;
+    private long mMinLength = DEFAULT_MIN_LENGTH;
 
     public Compressor path(String path) {
         mPath = Preconditions.checkNotNull(path);
@@ -38,6 +43,12 @@ public class Compressor {
     public Compressor width(int width) {
         Preconditions.checkArgument(width > 0);
         mWidth = width;
+        return this;
+    }
+
+    public Compressor minLength(Long min) {
+        Preconditions.checkArgument(min > 0);
+        mMinLength = min;
         return this;
     }
 
@@ -67,10 +78,14 @@ public class Compressor {
                             return;
                         }
 
-                        if (mInPlaceConvert){
-                            ImageUtil.compress(mPath, mWidth, mHeight, mQuality);
-                        } else {
-                            ImageUtil.compress(mPath, mNewPath, mWidth, mHeight, mQuality);
+                        File file = new File(mPath);
+
+                        if (file.length() > mMinLength) {
+                            if (mInPlaceConvert) {
+                                ImageUtil.compress(mPath, mWidth, mHeight, mQuality);
+                            } else {
+                                ImageUtil.compress(mPath, mNewPath, mWidth, mHeight, mQuality);
+                            }
                         }
                         subscriber.onNext(mInPlaceConvert ? mPath : mPath);
                         subscriber.onCompleted();
