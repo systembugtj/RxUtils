@@ -1,1 +1,1 @@
-include ':app', ':rx-download', ':rx-images'
+include ':app', ':rx-tools'
