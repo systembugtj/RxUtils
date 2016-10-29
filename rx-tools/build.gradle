@@ -3,6 +3,13 @@ apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
+def repo_context_url = hasProperty('artifactory_context_url') ? artifactory_context_url : System.getenv('artifactory_context_url')
+def repo_username = hasProperty('artifactory_username') ? artifactory_username : System.getenv('artifactory_username')
+def repo_password = hasProperty('artifactory_password') ? artifactory_password : System.getenv('artifactory_password')
+def repo_key = hasProperty('artifactory_key') ? artifactory_key : System.getenv('artifactory_key')
+
+def VERSION_NAME = System.getenv('BUILD_NUMBER') ? "1.1.0-${System.getenv('BUILD_NUMBER')}" : "1.1.0-SNAPSHOT"
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
@@ -18,7 +25,7 @@ android {
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
-        versionName "1.0"
+        versionName VERSION_NAME
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -55,7 +62,7 @@ dependencies {
 
 def libraryGroupId = 'me.systembug.rx'
 def libraryArtifactId = 'rx-tools'
-def libraryVersion = "1.0.0"
+def libraryVersion = VERSION_NAME
 
 publishing {
     publications {
@@ -70,13 +77,13 @@ publishing {
 }
 
 artifactory {
-    contextUrl = artifactory_context_url
+    contextUrl = repo_context_url
     publish {
         repository {
-            repoKey = 'libs-release-local'
+            repoKey = repo_key
 
-            username = artifactory_username
-            password = artifactory_password
+            username = repo_username
+            password = repo_password
         }
         defaults {
             publications('aar')
