@@ -15,13 +15,6 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url "${artifactory_context_url}/libs-release-local"
-            credentials {
-                username = "${artifactory_username}"
-                password = "${artifactory_password}"
-            }
-        }
         jcenter()
     }
 }

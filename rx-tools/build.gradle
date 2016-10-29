@@ -8,7 +8,7 @@ def repo_username = hasProperty('artifactory_username') ? artifactory_username :
 def repo_password = hasProperty('artifactory_password') ? artifactory_password : System.getenv('artifactory_password')
 def repo_key = hasProperty('artifactory_key') ? artifactory_key : System.getenv('artifactory_key')
 
-def VERSION_NAME = System.getenv('BUILD_NUMBER') ? "1.1.0-${System.getenv('BUILD_NUMBER')}" : "1.1.0-SNAPSHOT"
+def VERSION_NAME = System.getenv('BUILD_NUMBER') ? "1.1.0-System.getenv('BUILD_NUMBER')" : "1.1.0-SNAPSHOT"
 
 android {
     compileSdkVersion 23
@@ -34,6 +34,16 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    maven {
+        url "${repo_context_url}/libs-release-local"
+        credentials {
+            username = "${repo_username}"
+            password = "${repo_password}"
         }
     }
 }
