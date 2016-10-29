@@ -8,7 +8,10 @@ def repo_username = hasProperty('artifactory_username') ? artifactory_username :
 def repo_password = hasProperty('artifactory_password') ? artifactory_password : System.getenv('artifactory_password')
 def repo_key = hasProperty('artifactory_key') ? artifactory_key : System.getenv('artifactory_key')
 
-def VERSION_NAME = System.getenv('BUILD_NUMBER') ? "1.1.0-${System.getenv('BUILD_NUMBER')}" : "1.1.0-SNAPSHOT"
+
+def VERSION_NUMBER = "1.1.0"
+def VERSION_NAME = System.getenv('BUILD_NUMBER') ? "${VERIOSN_NUMBER}-System.getenv('BUILD_NUMBER')" : VERSION_NUMBER
+
 
 android {
     compileSdkVersion 23
