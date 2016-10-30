@@ -9,7 +9,7 @@ def repo_password = hasProperty('artifactory_password') ? artifactory_password :
 def repo_key = hasProperty('artifactory_key') ? artifactory_key : System.getenv('artifactory_key')
 
 def VERSION_NUMBER = "1.1.0"
-def VERSION_NAME = System.getenv('AUTO_BUILD_NUMBER') ? "${VERSION_NUMBER}-${System.getenv('AUTO_BUILD_NUMBER')}" : VERSION_NUMBER
+def VERSION_NAME = System.getenv('AUTO_BUILD_NUMBER') ? "${VERSION_NUMBER}.${System.getenv('AUTO_BUILD_NUMBER')}-SNAPSHOT" : VERSION_NUMBER
 
 
 android {
