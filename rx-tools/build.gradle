@@ -11,7 +11,7 @@ def repo_key = hasProperty('artifactory_key') ? artifactory_key : System.getenv(
 
 def VERSION_NUMBER = "1.1.0"
 def AUTO_BUILD_NUMBER = System.getenv('AUTO_BUILD_NUMBER')
-def VERSION_CODE = AUTO_BUILD_NUMBER ? AUTO_BUILD_NUMBER : 1
+def VERSION_CODE = AUTO_BUILD_NUMBER ? AUTO_BUILD_NUMBER : 1  as int
 def VERSION_NAME = AUTO_BUILD_NUMBER ? "$VERSION_NUMBER-SNAPSHOT" : VERSION_NUMBER
 
 
