@@ -8,8 +8,11 @@ def repo_username = hasProperty('artifactory_username') ? artifactory_username :
 def repo_password = hasProperty('artifactory_password') ? artifactory_password : System.getenv('artifactory_password')
 def repo_key = hasProperty('artifactory_key') ? artifactory_key : System.getenv('artifactory_key')
 
+
 def VERSION_NUMBER = "1.1.0"
-def VERSION_NAME = System.getenv('AUTO_BUILD_NUMBER') ? "${VERSION_NUMBER}.${System.getenv('AUTO_BUILD_NUMBER')}-SNAPSHOT" : VERSION_NUMBER
+def AUTO_BUILD_NUMBER = System.getenv('AUTO_BUILD_NUMBER')
+def VERSION_CODE = AUTO_BUILD_NUMBER ? AUTO_BUILD_NUMBER : 1
+def VERSION_NAME = AUTO_BUILD_NUMBER ? "$VERSION_NUMBER-SNAPSHOT" : VERSION_NUMBER
 
 
 android {
@@ -25,7 +28,7 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 1
+        versionCode VERSION_CODE
         versionName VERSION_NAME
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
