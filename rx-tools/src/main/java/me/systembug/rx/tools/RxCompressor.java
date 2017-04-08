@@ -6,11 +6,11 @@ import com.google.common.base.Strings;
 import java.io.File;
 import java.security.InvalidParameterException;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import me.systembug.utils.Images;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+
 
 /**
  * Created by systembug on 4/17/16.
@@ -71,31 +71,25 @@ public class RxCompressor {
     }
 
     public Observable<String> compress() {
-        return Observable.create(new Observable.OnSubscribe<String>() {
-                    @Override
-                    public void call(Subscriber<? super String> subscriber) {
-                        if (Strings.isNullOrEmpty(mPath)) {
-                            subscriber.onError(new InvalidParameterException("path should be set."));
-                            return;
-                        }
-
-                        if (!mInPlaceConvert && Strings.isNullOrEmpty(mNewPath)) {
-                            subscriber.onError(new InvalidParameterException("output path should be set."));
-                            return;
-                        }
-
-                        File file = new File(mPath);
-
-                        if (file.length() > mMinLength) {
-                            if (mInPlaceConvert) {
-                                Images.compress(mPath, mWidth, mHeight, mQuality);
-                            } else {
-                                Images.compress(mPath, mNewPath, mWidth, mHeight, mQuality);
-                            }
-                        }
-                        subscriber.onNext(mInPlaceConvert ? mPath : mPath);
-                        subscriber.onCompleted();
+        return Observable.fromCallable(() -> {
+                    if (Strings.isNullOrEmpty(mPath)) {
+                        throw new InvalidParameterException("path should be set.");
                     }
+
+                    if (!mInPlaceConvert && Strings.isNullOrEmpty(mNewPath)) {
+                        throw  new InvalidParameterException("output path should be set.");
+                    }
+
+                    File file = new File(mPath);
+
+                    if (file.length() > mMinLength) {
+                        if (mInPlaceConvert) {
+                            Images.compress(mPath, mWidth, mHeight, mQuality);
+                        } else {
+                            Images.compress(mPath, mNewPath, mWidth, mHeight, mQuality);
+                        }
+                    }
+                    return mInPlaceConvert ? mPath : mPath;
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread());

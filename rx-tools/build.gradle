@@ -1,19 +1,10 @@
 apply plugin: 'com.android.library'
 apply plugin: 'me.tatarka.retrolambda'
-apply plugin: 'com.jfrog.artifactory'
-apply plugin: 'maven-publish'
 
-def repo_context_url = hasProperty('artifactory_context_url') ? artifactory_context_url : System.getenv('artifactory_context_url')
-def repo_username = hasProperty('artifactory_username') ? artifactory_username : System.getenv('artifactory_username')
-def repo_password = hasProperty('artifactory_password') ? artifactory_password : System.getenv('artifactory_password')
-def repo_key = hasProperty('artifactory_key') ? artifactory_key : System.getenv('artifactory_key')
+apply plugin: 'com.github.dcendents.android-maven'
 
-
-def VERSION_NUMBER = "1.1.0"
-def AUTO_BUILD_NUMBER = System.getenv('AUTO_BUILD_NUMBER')
-def VERSION_CODE = AUTO_BUILD_NUMBER ? AUTO_BUILD_NUMBER.toInteger() : 1
-def VERSION_NAME = AUTO_BUILD_NUMBER ? "$VERSION_NUMBER-SNAPSHOT" : VERSION_NUMBER
-
+group='com.github.systembugtj'
+version="2.0.0"
 
 android {
     compileSdkVersion 23
@@ -28,8 +19,8 @@ android {
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode VERSION_CODE
-        versionName VERSION_NAME
+        versionCode 10
+        versionName version
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -42,15 +33,6 @@ android {
     }
 }
 
-repositories {
-    maven {
-        url "${repo_context_url}/libs-release-local"
-        credentials {
-            username = "${repo_username}"
-            password = "${repo_password}"
-        }
-    }
-}
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -58,8 +40,12 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'io.reactivex:rxjava:1.2.1'
-    compile 'io.reactivex:rxandroid:1.2.1'
+
+    //RxJava2
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    // Because RxAndroid releases are few and far between, it is recommended you also
+    // explicitly depend on RxJava's latest version for bug fixes and new features.
+    compile 'io.reactivex.rxjava2:rxjava:2.0.4'
 
     // QRCode
     compile 'cn.bingoogolapple:bga-qrcodecore:1.0.6@aar'
@@ -72,39 +58,4 @@ dependencies {
     compile 'com.google.guava:guava:19.0+'
 
     testCompile 'junit:junit:4.12'
-}
-
-def libraryGroupId = 'me.systembug.rx'
-def libraryArtifactId = 'rx-tools'
-def libraryVersion = VERSION_NAME
-
-publishing {
-    publications {
-        aar(MavenPublication) {
-            groupId libraryGroupId
-            version libraryVersion
-            artifactId libraryArtifactId
-
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
-        }
-    }
-}
-
-artifactory {
-    contextUrl = repo_context_url
-    publish {
-        repository {
-            repoKey = repo_key
-
-            username = repo_username
-            password = repo_password
-        }
-        defaults {
-            publications('aar')
-            publishArtifacts = true
-
-            properties = ['qa.level': 'basic', 'q.os': 'android', 'dev.team': 'core']
-            publishPom = true
-        }
-    }
 }
