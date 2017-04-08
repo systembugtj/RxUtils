@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
-import io.reactivex.Observable;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -70,34 +69,39 @@ public class RxDownloader {
     }
 
     public Observable<Integer> download() {
-        return Observable.<Response>((subscriber) -> {
-                    if (Strings.isNullOrEmpty(mUrl)) {
-                        subscriber.onError(new InvalidParameterException("url should be set."));
-                        return;
-                    }
-                    if (Strings.isNullOrEmpty(mLocal)) {
-                        subscriber.onError(new InvalidParameterException("local should be set."));
-                        return;
-                    }
-
-                    getOkHttpClient().newCall(new Request.Builder().url(mUrl).build()).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            subscriber.onError(e);
+        return Observable.create(new Observable.OnSubscribe<Response>() {
+                    @Override
+                    public void call(Subscriber<? super Response> subscriber) {
+                        if (Strings.isNullOrEmpty(mUrl)) {
+                            subscriber.onError(new InvalidParameterException("url should be set."));
+                            return;
+                        }
+                        if (Strings.isNullOrEmpty(mLocal)) {
+                            subscriber.onError(new InvalidParameterException("local should be set."));
+                            return;
                         }
 
-                        @Override
-                        public void onResponse(Call call, final Response response) throws IOException {
-                            if (!response.isSuccessful()) {
-                                subscriber.onError(new IOException("Unexpected code " + response));
-                            } else {
-                                subscriber.onNext(response);
-                                subscriber.onComplete();
-                            }
-                        }
-                    });
+                        getOkHttpClient().newCall(new Request.Builder().url(mUrl).build()).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    subscriber.onError(e);
+                                }
+
+                                @Override
+                                public void onResponse(Call call, final Response response) throws IOException {
+                                    if (!response.isSuccessful()) {
+                                        subscriber.onError(new IOException("Unexpected code " + response));
+                                    } else {
+                                        subscriber.onNext(response);
+                                        subscriber.onCompleted();
+                                    }
+                                }
+                            });
+                    }
                 })
-                .flatMap(response -> Observable.create((subscriber) -> {
+                .flatMap(response -> Observable.create(new Observable.OnSubscribe<Integer>() {
+                            @Override
+                            public void call(Subscriber<? super Integer> subscriber) {
                                 BufferedSink sink = null;
                                 try {
 
