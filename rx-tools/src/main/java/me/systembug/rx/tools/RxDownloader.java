@@ -7,6 +7,12 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.annotations.NonNull;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -16,10 +22,9 @@ import okhttp3.ResponseBody;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by systembug on 4/12/16.
@@ -41,12 +46,12 @@ public class RxDownloader {
         }
 
         public Builder url(String url) {
-            mUrl =  Preconditions.checkNotNull(url);
+            mUrl = Preconditions.checkNotNull(url);
             return this;
         }
 
         public Builder local(String local) {
-            mLocal =  Preconditions.checkNotNull(local);
+            mLocal = Preconditions.checkNotNull(local);
             return this;
         }
 
@@ -69,74 +74,73 @@ public class RxDownloader {
     }
 
     public Observable<Integer> download() {
-        return Observable.create(new Observable.OnSubscribe<Response>() {
+        return Observable.create(new ObservableOnSubscribe<Response>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Response> emitter) throws Exception {
+                if (Strings.isNullOrEmpty(mUrl)) {
+                    emitter.onError(new InvalidParameterException("url should be set."));
+                    return;
+                }
+                if (Strings.isNullOrEmpty(mLocal)) {
+                    emitter.onError(new InvalidParameterException("local should be set."));
+                    return;
+                }
+
+                getOkHttpClient().newCall(new Request.Builder().url(mUrl).build()).enqueue(new Callback() {
                     @Override
-                    public void call(Subscriber<? super Response> subscriber) {
-                        if (Strings.isNullOrEmpty(mUrl)) {
-                            subscriber.onError(new InvalidParameterException("url should be set."));
-                            return;
-                        }
-                        if (Strings.isNullOrEmpty(mLocal)) {
-                            subscriber.onError(new InvalidParameterException("local should be set."));
-                            return;
-                        }
-
-                        getOkHttpClient().newCall(new Request.Builder().url(mUrl).build()).enqueue(new Callback() {
-                                @Override
-                                public void onFailure(Call call, IOException e) {
-                                    subscriber.onError(e);
-                                }
-
-                                @Override
-                                public void onResponse(Call call, final Response response) throws IOException {
-                                    if (!response.isSuccessful()) {
-                                        subscriber.onError(new IOException("Unexpected code " + response));
-                                    } else {
-                                        subscriber.onNext(response);
-                                        subscriber.onCompleted();
-                                    }
-                                }
-                            });
+                    public void onFailure(Call call, IOException e) {
+                        emitter.onError(e);
                     }
-                })
-                .flatMap(response -> Observable.create(new Observable.OnSubscribe<Integer>() {
-                            @Override
-                            public void call(Subscriber<? super Integer> subscriber) {
-                                BufferedSink sink = null;
-                                try {
 
-                                    File file = new File(mLocal);
+                    @Override
+                    public void onResponse(Call call, final Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            emitter.onError(new IOException("Unexpected code " + response));
+                        } else {
+                            emitter.onNext(response);
+                            emitter.onComplete();
+                        }
+                    }
+                });
+            }
+        }).flatMap(response -> Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Integer> emitter) throws Exception {
+                BufferedSink sink = null;
+                try {
 
-                                    sink = Okio.buffer(Okio.sink(file));
+                    File file = new File(mLocal);
 
-                                    int DOWNLOAD_CHUNK_SIZE = 2048;
-                                    long bytesRead = 0;
-                                    ResponseBody body = response.body();
-                                    long contentLength = body.contentLength();
-                                    BufferedSource source = body.source();
+                    sink = Okio.buffer(Okio.sink(file));
 
-                                    while (source.read(sink.buffer(), DOWNLOAD_CHUNK_SIZE) != -1) {
-                                        bytesRead += DOWNLOAD_CHUNK_SIZE;
-                                        int progress = (int) ((bytesRead * 100) / contentLength);
-                                        subscriber.onNext(new Integer(progress));
-                                    }
+                    int DOWNLOAD_CHUNK_SIZE = 2048;
+                    long bytesRead = 0;
+                    ResponseBody body = response.body();
+                    long contentLength = body.contentLength();
+                    BufferedSource source = body.source();
 
-                                    sink.writeAll(source);
-                                    sink.close();
-                                    subscriber.onCompleted();
-                                } catch (IOException ex) {
-                                    try {
-                                        if (sink != null) {
-                                            sink.close();
-                                        }
-                                    } catch (Exception ignored) {
-                                        // ignore exceptions generated by close()
-                                    }
-                                }
-                            }
-                        }))
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread());
+                    while (source.read(sink.buffer(), DOWNLOAD_CHUNK_SIZE) != -1) {
+                        bytesRead += DOWNLOAD_CHUNK_SIZE;
+                        int progress = (int) ((bytesRead * 100) / contentLength);
+                        emitter.onNext(new Integer(progress));
+                    }
+
+                    sink.writeAll(source);
+                    sink.close();
+                } catch (IOException ex) {
+                    try {
+                        if (sink != null) {
+                            sink.close();
+                        }
+                        emitter.onError(ex);
+                    } catch (Exception ignored) {
+                        // ignore exceptions generated by close()
+                    }
+                }
+
+                emitter.onComplete();
+            }
+        })).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 }
 

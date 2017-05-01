@@ -6,11 +6,14 @@ import com.google.common.base.Strings;
 import java.io.File;
 import java.security.InvalidParameterException;
 
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.annotations.NonNull;
 import me.systembug.utils.Images;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by systembug on 4/17/16.
@@ -70,17 +73,17 @@ public class RxCompressor {
         return this;
     }
 
-    public Observable<String> compress() {
-        return Observable.create(new Observable.OnSubscribe<String>() {
+    public Single<String> compress() {
+        return Single.create(new SingleOnSubscribe<String>() {
                     @Override
-                    public void call(Subscriber<? super String> subscriber) {
+                    public void subscribe(@NonNull SingleEmitter<String> e) throws Exception {
                         if (Strings.isNullOrEmpty(mPath)) {
-                            subscriber.onError(new InvalidParameterException("path should be set."));
+                            e.onError(new InvalidParameterException("path should be set."));
                             return;
                         }
 
                         if (!mInPlaceConvert && Strings.isNullOrEmpty(mNewPath)) {
-                            subscriber.onError(new InvalidParameterException("output path should be set."));
+                            e.onError(new InvalidParameterException("output path should be set."));
                             return;
                         }
 
@@ -93,8 +96,7 @@ public class RxCompressor {
                                 Images.compress(mPath, mNewPath, mWidth, mHeight, mQuality);
                             }
                         }
-                        subscriber.onNext(mInPlaceConvert ? mPath : mPath);
-                        subscriber.onCompleted();
+                        e.onSuccess(mInPlaceConvert ? mPath : mPath);
                     }
                 })
                 .subscribeOn(Schedulers.io())
