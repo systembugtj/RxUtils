@@ -4,7 +4,7 @@ group='com.github.systembugtj'
 version="2.1.0"
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     buildToolsVersion '26.0.2'
 
     compileOptions {
@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 10
         versionName version
 
@@ -34,7 +34,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.android.support:appcompat-v7:25.3.0'
+    implementation 'com.android.support:appcompat-v7:26.0.0'
 
     // RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.1.0'
@@ -48,7 +48,7 @@ dependencies {
     implementation 'com.squareup.okio:okio:1.12.0'
     implementation 'com.google.guava:guava:23.3-android'
 
-    implementation "com.github.systembugtj:commonutils:1.0.0"
+    implementation "com.github.systembugtj:commonutils:1.1.0"
 
 
     testImplementation 'junit:junit:4.12'
