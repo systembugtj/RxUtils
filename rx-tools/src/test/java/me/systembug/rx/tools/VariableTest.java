@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.schedulers.TestScheduler;
+import me.systembug.reactivex.Variable;
 
 import static org.junit.Assert.*;
 
