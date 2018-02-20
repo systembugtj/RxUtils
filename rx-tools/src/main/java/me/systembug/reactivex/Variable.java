@@ -1,4 +1,4 @@
-package me.systembug.rx.tools;
+package me.systembug.reactivex;
 
 /**
  * Created by albert.li on 2/16/18.

@@ -1,7 +1,6 @@
-package me.systembug.rx.tools;
+package me.systembug.reactivex;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 
 import java.io.File;
 import java.io.FileOutputStream;

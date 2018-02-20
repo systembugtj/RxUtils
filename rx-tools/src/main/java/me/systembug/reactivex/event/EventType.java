@@ -1,4 +1,4 @@
-package me.systembug.rx.tools.event;
+package me.systembug.reactivex.event;
 
 /**
  * Created by systembug on 4/1/16.

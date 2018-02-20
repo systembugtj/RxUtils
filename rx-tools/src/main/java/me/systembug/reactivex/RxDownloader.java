@@ -1,4 +1,4 @@
-package me.systembug.rx.tools;
+package me.systembug.reactivex;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -9,9 +9,6 @@ import java.security.InvalidParameterException;
 
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
 import okhttp3.Call;
 import okhttp3.Callback;

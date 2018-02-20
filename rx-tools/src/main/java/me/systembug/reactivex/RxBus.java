@@ -1,7 +1,7 @@
-package me.systembug.rx.tools;
+package me.systembug.reactivex;
 
 
-import me.systembug.rx.tools.event.AsyncEvent;
+import me.systembug.reactivex.event.AsyncEvent;
 import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 

@@ -1,4 +1,4 @@
-package me.systembug.rx.tools;
+package me.systembug.reactivex;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
@@ -11,7 +11,6 @@ import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
 import io.reactivex.annotations.NonNull;
 import me.systembug.utils.Images;
-import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
