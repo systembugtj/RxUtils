@@ -19,7 +19,7 @@ import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import me.systembug.reactivex.RxQRCode;
-import me.systembug.rx.tools.Variable;
+import me.systembug.reactivex.Variable;
 
 public class MainActivity extends AppCompatActivity {
 
