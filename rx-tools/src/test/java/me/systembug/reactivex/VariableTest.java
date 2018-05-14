@@ -1,4 +1,4 @@
-package me.systembug.rx.tools;
+package me.systembug.reactivex;
 
 import org.junit.Test;
 
